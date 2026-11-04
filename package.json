@@ -15,6 +15,7 @@
   "build": {
     "appId": "com.vendora.pro",
     "productName": "Vendora PRO",
+    "publish": null,
     "win": {
       "target": "nsis"
     }
