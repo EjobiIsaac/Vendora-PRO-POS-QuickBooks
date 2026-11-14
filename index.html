@@ -7,8 +7,30 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="css/style.css">
+<style>
+#vendoraLicense{position:fixed;inset:0;background:#0f172a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px}
+</style>
+<script>
+var VENDORA_KEYS=["VD-4829-6173","VD-1957-8420","VD-7304-2961","VD-9186-3745","VD-2640-8592"];
+function checkVendoraKey(){
+var k=document.getElementById('vendoraKeyInput').value.trim().toUpperCase();
+if(VENDORA_KEYS.indexOf(k)>-1){localStorage.setItem('vendora_license',k);document.getElementById('vendoraLicense').style.display='none';document.getElementById('vendoraApp').style.display='block';alert('LICENSE ACTIVATED! Welcome to Vendora PRO');}else{alert('Invalid Key! Buy original from Isaac Savvy - 0770960837');}
+}
+</script>
 </head>
 <body class="bg-[#f1f5f9] text-slate-800 font-sans">
+<div id="vendoraLicense">
+<div style="background:white;padding:24px;border-radius:16px;width:100%;max-width:360px;text-align:center">
+<div style="font-size:34px">🛒</div>
+<h2 style="color:#0f172a;font-weight:900;font-size:20px">VENDORA PRO</h2>
+<p style="font-size:13px;color:#555">POS + ACCOUNTING ENTERPRISE<br>Isaac Savvy Soft</p>
+<p style="font-size:13px;font-weight:700;margin:12px 0">Enter License Key to Activate</p>
+<input id="vendoraKeyInput" placeholder="VD-XXXX-XXXX" style="width:100%;padding:12px;border:1px solid #ccc;border-radius:8px;text-transform:uppercase">
+<button onclick="checkVendoraKey()" style="width:100%;background:#4f46e5;color:white;padding:12px;border:none;border-radius:8px;font-weight:bold;margin-top:10px;cursor:pointer">✅ ACTIVATE</button>
+<p style="font-size:11px;color:#888;margin-top:10px">One key = One shop. Buy from: Isaac Savvy - 0770960837</p>
+</div>
+</div>
+<div id="vendoraApp" style="display:none">
 <div class="bg-[#0f172a] text-white px-4 py-3 flex justify-between items-center sticky top-0 z-50 shadow-lg">
   <div class="flex items-center gap-3">
     <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center font-black text-xl">V</div>
@@ -20,8 +42,7 @@
     <button onclick="document.getElementById('restoreFile').click()" class="bg-amber-500 text-black px-3 py-2 rounded-lg text-xs font-bold">↩ RESTORE</button>
     <input type="file" id="restoreFile" hidden accept=".json" onchange="restoreAll(event)">
   </div>
-</div>
-<div class="flex">
+</div><div class="flex">
   <div class="w-[210px] bg-white h-[calc(100vh-60px)] sticky top-[60px] p-3 hidden md:block border-r shadow-sm">
     <p class="text-[10px] font-bold text-slate-400 px-2 mb-2">MENU</p>
     <div id="menu" class="space-y-1"></div>
@@ -88,8 +109,7 @@
       <div class="flex justify-between items-center mb-3"><h2 class="text-xl font-black">Products & Variants</h2><button onclick="openProductModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Add Product with Variants</button></div>
       <input id="prodSearch" oninput="renderProducts()" placeholder="Search products..." class="w-full p-3 rounded-xl border bg-white mb-3">
       <div id="productList" class="space-y-3"></div>
-    </div>
-    <div id="page-stock" class="page hidden">
+        </div>    <div id="page-stock" class="page hidden">
       <h2 class="text-xl font-black mb-3">Stock Management - Per Variant</h2>
       <div class="bg-white p-4 rounded-2xl shadow-sm mb-3 grid md:grid-cols-4 gap-2">
         <select id="stockProd" class="border p-2 rounded-lg text-xs"></select>
@@ -153,6 +173,13 @@
     <button onclick="closeVarModal()" class="w-full bg-slate-200 py-2 rounded-lg mt-3 text-xs font-bold">Cancel</button>
   </div>
 </div>
+</div>
+<script>
+try{
+var savedVD=localStorage.getItem('vendora_license');
+if(savedVD && VENDORA_KEYS.indexOf(savedVD)>-1){document.getElementById('vendoraLicense').style.display='none';document.getElementById('vendoraApp').style.display='block';}
+}catch(e){}
+</script>
 <script src="js/seed.js"></script>
 <script src="js/app.js"></script>
 <script src="js/products.js"></script>
