@@ -1,0 +1,16 @@
+name: Build Vendora PRO EXE - Release
+on:
+  release:
+    types: [published]
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install pywebview pyinstaller
+      - run: pyinstaller --noconfirm --onefile --windowed --name "Vendora-PRO" --add-data "index.html;." --add-data "css;css" --add-data "js;js" --add-data "lock.html;." app.py
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/Vendora-PRO.exe
