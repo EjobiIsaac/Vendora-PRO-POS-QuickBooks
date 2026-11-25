@@ -1,0 +1,5 @@
+keygen.py
+__pycache__/
+dist/
+build/
+*.spec
