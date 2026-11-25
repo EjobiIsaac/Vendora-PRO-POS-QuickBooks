@@ -1,37 +1,47 @@
-# Vendora PRO - POS + Accounting Enterprise
+# 🛒 Vendora PRO - POS + Accounting Enterprise
 
-POS with Product Variants, Barcode, Stock per Variant, VAT, Customers & Credit, Accounting Ledger, Backup/Restore, QuickBooks Export.
+**By Savvy Soft Technologies**
 
-## Features
-- POS with Variants: Same product, different size/colour/price/stock (e.g. Coca-Cola 300ml, 500ml, 1L)
-- Stock per Variant + Low Stock Alert
-- VAT 18% (editable), Discount, Change calculation
-- Payment: Cash, Mobile Money, Card, Bank, Credit/Debt
-- Customers & Credit Balance + Debt Payment
-- Expenses + Accounting Ledger (Auto from POS)
-- Dashboard: Today Sales, Total Profit, Stock Value
-- Backup / Restore: Full .json backup - Products, Variants, Sales, Customers, Expenses
-- Export: QuickBooks Excel + Full Excel Report
+Vendora PRO is a professional Point of Sale + Accounting software for shops, supermarkets, pharmacies, boutiques and restaurants in Uganda and Africa.
 
-## How to Run
-1. Open `index.html` in browser, or open GitHub Pages link
-2. Add your Business Name in sidebar
-3. Add Products with Variants
-4. Sell in POS
+Built for speed, offline use, and real business accounting.
 
-## Backup
-Settings > Download Backup (.json) - Keep safe. Use Restore to bring back on another computer.
+### ✨ Features
 
-## File Structure
-- `index.html` - Layout
-- `css/style.css` - Design
-- `js/seed.js` - Demo Data (Item Name, Price)
-- `js/app.js` - Main Brain + Dashboard
-- `js/products.js` - Products + Variants
-- `js/pos.js` - POS + Cart + Checkout
-- `js/stock.js` - Stock per Variant
-- `js/customers.js` - Customers + Expenses
-- `js/accounting.js` - Ledger
-- `js/backup.js` - Backup / Restore / Export
+- 🛒 POS - Fast selling with variants, barcode, discounts
+- 📦 Products & Variants - e.g. Coca-Cola 300ml, 500ml, 1L - each own price & stock
+- 📊 Stock Management - Per variant, low stock alerts
+- 🧾 Sales History & Receipts - Print ready
+- 👥 Customers & Credit / Debt Tracking
+- 💸 Expenses Management
+- 📒 Accounting - Auto Ledger, Profit & Loss, Income vs Expenses
+- 🧾 VAT - 18% Uganda VAT included, customizable
+- 💾 Backup & Restore - Export / Import .json
+- 📤 Export to QuickBooks & Excel
+- 💱 Multi-Currency - UGX, KES, TZS, USD, NGN, ZAR
 
-Built for Enterprises in Uganda, Kenya, Tanzania, Nigeria, South Africa.
+### 🔒 License - Silent 14-Day Trial
+
+- Download `Vendora-PRO.exe` and use it free for **14 days**
+- No signup, no internet needed
+- After 14 days, app locks and asks for a **Forever License Key**
+- One Key = One Shop = Forever. No yearly renewal.
+- To get your key, send your **Machine ID** shown on lock screen to Savvy Soft
+
+### 📥 Download
+
+Go to **Releases** on this repo and download the latest `Vendora-PRO.exe`
+- Windows 10 / 11 - Just double-click, no Python needed
+- Works offline
+
+### 📞 Contact - Savvy Soft Technologies
+
+**Call / WhatsApp:** 0770960837 / 0702788215
+**Product:** Vendora PRO
+**Developer:** Isaac - Savvy Soft Technologies
+
+### 🛠️ For Developers
+
+```bash
+pip install -r requirements.txt
+python app.py
