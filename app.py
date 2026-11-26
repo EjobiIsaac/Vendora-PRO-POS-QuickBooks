@@ -1,45 +1,91 @@
-import os, json, hashlib, sqlite3, datetime, uuid, webview
+import os
+import sys
+import json
+import hashlib
+import sqlite3
+import datetime
+import uuid
+import shutil
+import winreg
+import webview
 
 APP_NAME = "Vendora PRO"
 COMPANY = "Savvy Soft Technologies"
 PHONES = "0770960837 / 0702788215"
 TRIAL_DAYS = 14
-# !!! CHANGE THIS TO YOUR OWN SECRET. Never share it. Never push keygen.py to GitHub !!!
-SECRET = "SAVVY-SOFT-VENDORA-2026-X9K2M4P8Q1Z-SECRET"
+
+# Safe for GitHub: set VENDORA_SECRET in your PC environment or GitHub Actions Secrets
+SECRET = os.environ.get("VENDORA_SECRET", "CHANGE-ME-BEFORE-BUILD")
 
 BASE = os.path.join(os.path.expanduser("~"), ".VendoraPRO")
 os.makedirs(BASE, exist_ok=True)
 STATE_FILE = os.path.join(BASE, "state.dat")
 DB_FILE = os.path.join(BASE, "vendora.db")
 
+
+def resource_path(relative_path):
+    """Works both on laptop and inside PyInstaller EXE."""
+    base_path = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
+
+
 def machine_id():
-    raw = str(uuid.getnode()) + os.environ.get("COMPUTERNAME","") + os.environ.get("USERNAME","")
+    """Stable hardware/OS ID that survives Wi-Fi/Ethernet toggles and Windows user changes."""
+    hw_guid = ""
+    try:
+        key = winreg.OpenKey(
+            winreg.HKEY_LOCAL_MACHINE,
+            r"SOFTWARE\Microsoft\Cryptography",
+            0,
+            winreg.KEY_READ | winreg.KEY_WOW64_64KEY
+        )
+        hw_guid, _ = winreg.QueryValueEx(key, "MachineGuid")
+        winreg.CloseKey(key)
+    except Exception:
+        hw_guid = str(uuid.getnode())
+
+    raw = f"{hw_guid}|{os.environ.get('COMPUTERNAME', '')}"
     return hashlib.sha256(raw.encode()).hexdigest()[:12].upper()
+
 
 def _xor(data, key):
     return bytes([b ^ ord(key[i % len(key)]) for i, b in enumerate(data)])
 
+
 def load_state():
+    today = datetime.date.today().isoformat()
     if not os.path.exists(STATE_FILE):
-        state = {"first_run": datetime.date.today().isoformat(), "license": "", "license_valid": False}
+        state = {
+            "first_run": today,
+            "last_seen": today,
+            "license": "",
+            "license_valid": False
+        }
         save_state(state)
         return state
     try:
-        raw = open(STATE_FILE, "rb").read()
-        return json.loads(_xor(raw, SECRET).decode())
-    except:
-        return {"first_run": "2000-01-01", "license": "", "license_valid": False}
+        with open(STATE_FILE, "rb") as f:
+            raw = f.read()
+        state = json.loads(_xor(raw, SECRET).decode())
+        if "last_seen" not in state:
+            state["last_seen"] = state.get("first_run", today)
+        return state
+    except Exception:
+        # Tampered state.dat = immediate lock
+        return {"first_run": "2000-01-01", "last_seen": today, "license": "", "license_valid": False}
+
 
 def save_state(state):
-    open(STATE_FILE, "wb").write(_xor(json.dumps(state).encode(), SECRET))
+    with open(STATE_FILE, "wb") as f:
+        f.write(_xor(json.dumps(state).encode(), SECRET))
+
 
 def make_key_for_machine(machine):
-    # Hard mixed key: letters + numbers, no O/0/I/1 confusion
     raw = f"VENDORA|{machine}|{SECRET}"
     h = hashlib.sha256(raw.encode()).hexdigest().upper()
-    # Filter to safe chars
     safe = "".join([c for c in h if c not in "O0I1"])
     return f"SAVVY-{safe[0:4]}-{safe[4:8]}-{safe[8:12]}-{safe[12:16]}-{safe[16:20]}"
+
 
 def is_licensed():
     s = load_state()
@@ -47,18 +93,50 @@ def is_licensed():
         return False
     return s.get("license") == make_key_for_machine(machine_id())
 
+
 def trial_expired():
     if is_licensed():
         return False
     try:
-        first = datetime.date.fromisoformat(load_state()["first_run"])
-    except:
+        state = load_state()
+        first = datetime.date.fromisoformat(state["first_run"])
+        last_seen = datetime.date.fromisoformat(state.get("last_seen", state["first_run"]))
+        today = datetime.date.today()
+
+        # Anti-date rollback check: lock if Windows clock was moved backwards
+        if today < last_seen:
+            return True
+
+        # Advance last_seen forward when a new day starts
+        if today > last_seen:
+            state["last_seen"] = today.isoformat()
+            save_state(state)
+
+        return (today - first).days >= TRIAL_DAYS
+    except Exception:
         return True
-    return (datetime.date.today() - first).days >= TRIAL_DAYS
+
+
+def init_db():
+    con = sqlite3.connect(DB_FILE)
+    con.execute("CREATE TABLE IF NOT EXISTS kv_store(k TEXT PRIMARY KEY, v TEXT)")
+    con.execute("CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, data TEXT)")
+    con.execute("CREATE TABLE IF NOT EXISTS sales(id INTEGER PRIMARY KEY, data TEXT)")
+    con.execute("CREATE TABLE IF NOT EXISTS activity(id INTEGER PRIMARY KEY, who TEXT, action TEXT, time TEXT)")
+    con.commit()
+    con.close()
+
 
 class Api:
     def get_status(self):
-        return {"locked": trial_expired(), "company": COMPANY, "phones": PHONES, "machine": machine_id()}
+        return {
+            "locked": trial_expired(),
+            "licensed": is_licensed(),
+            "company": COMPANY,
+            "phones": PHONES,
+            "machine": machine_id()
+        }
+
     def activate(self, key):
         key = key.strip().upper().replace(" ", "")
         if key == make_key_for_machine(machine_id()):
@@ -68,19 +146,58 @@ class Api:
             save_state(s)
             return {"ok": True}
         return {"ok": False, "msg": f"Invalid Key. Buy original from {COMPANY} - {PHONES}"}
+
     def get_machine_id(self):
         return machine_id()
 
-def init_db():
-    con = sqlite3.connect(DB_FILE)
-    con.execute("CREATE TABLE IF NOT EXISTS products(id INTEGER PRIMARY KEY, data TEXT)")
-    con.execute("CREATE TABLE IF NOT EXISTS sales(id INTEGER PRIMARY KEY, data TEXT)")
-    con.execute("CREATE TABLE IF NOT EXISTS activity(id INTEGER PRIMARY KEY, who TEXT, action TEXT, time TEXT)")
-    con.commit(); con.close()
+    # --- SQLite Persistent Storage Bridge (Keeps exact JSON strings for localStorage) ---
+    def load_all_data(self):
+        con = sqlite3.connect(DB_FILE)
+        rows = con.execute("SELECT k, v FROM kv_store").fetchall()
+        con.close()
+        return {k: v for k, v in rows}
+
+    def set_item(self, key, value):
+        to_save = value if isinstance(value, str) else json.dumps(value)
+        con = sqlite3.connect(DB_FILE)
+        con.execute("INSERT OR REPLACE INTO kv_store(k, v) VALUES (?, ?)", (str(key), to_save))
+        con.commit()
+        con.close()
+        return True
+
+    def remove_item(self, key):
+        con = sqlite3.connect(DB_FILE)
+        con.execute("DELETE FROM kv_store WHERE k = ?", (str(key),))
+        con.commit()
+        con.close()
+        return True
+
+    def clear_all_data(self):
+        con = sqlite3.connect(DB_FILE)
+        con.execute("DELETE FROM kv_store")
+        con.commit()
+        con.close()
+        return True
+
+    def backup_database_file(self):
+        if not webview.windows:
+            return {"ok": False}
+        stamp = datetime.date.today().isoformat()
+        target = webview.windows[0].create_file_dialog(
+            webview.SAVE_DIALOG,
+            save_filename=f"VendoraPRO_FullBackup_{stamp}.db"
+        )
+        if target:
+            dest = target[0] if isinstance(target, (list, tuple)) else target
+            shutil.copy2(DB_FILE, dest)
+            return {"ok": True, "path": dest}
+        return {"ok": False}
+
 
 if __name__ == "__main__":
     init_db()
     api = Api()
-    html = os.path.join(os.path.dirname(__file__), "index.html")
+    start_page = "lock.html" if trial_expired() else "index.html"
+    html = resource_path(start_page)
     win = webview.create_window(APP_NAME, url=html, js_api=api, width=1280, height=800)
     webview.start()
