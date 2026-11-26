@@ -1,9 +1,67 @@
-/* Vendora PRO - Savvy Soft Technologies */
-* { box-sizing: border-box; }
-body { font-family: system-ui, -apple-system, sans-serif; }
+/* ============================================
+   VENDORA PRO - style.css
+   ============================================ */
+
+* { -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #f1f5f9;
+  padding-bottom: 80px;
+}
+
+/* POS Product Cards */
+.pos-card {
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.pos-card:active {
+  transform: scale(0.96);
+  background: #e0e7ff !important;
+}
+
+/* Cart items */
+.cart-item {
+  border-bottom: 1px solid #f1f5f9;
+}
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+/* Buttons */
+.btn-press:active { transform: scale(0.97); }
+
+/* Scrollbar - hide for clean look */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-thumb { background: #c7d2fe; border-radius: 10px; }
-.page { animation: fadeIn 0.2s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-input, select, button { outline: none; }
-input:focus, select:focus { border-color: #4f46e5 !important; box-shadow: 0 0 0 2px #e0e7ff; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+/* Print Receipt - Hide everything else when printing */
+@media print {
+  body * { visibility: hidden; }
+  #receiptModal, #receiptModal * { visibility: visible; }
+  #receiptModal { position: absolute; left: 0; top: 0; width: 100%; }
+}
+
+/* Bottom Nav - Active State */
+.nav-btn.active {
+  color: #4f46e5;
+  font-weight: 700;
+}
+.nav-btn.active svg, .nav-btn.active span {
+  color: #4f46e5;
+}
+
+/* Low Stock Shake */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(3px); }
+}
+.low-stock { animation: shake 0.4s; }
+
+/* Modal */
+.modal-backdrop {
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(2px);
+  }
