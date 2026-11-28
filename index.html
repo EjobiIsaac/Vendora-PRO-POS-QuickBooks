@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Vendora PRO - POS + Accounting Enterprise</title>
 <!-- Local offline libraries (Works 100% without internet) -->
-<script src="js/tailwind.js"></script>
+<link rel="stylesheet" href="css/tailwind.css">
 <script src="js/xlsx.full.min.js"></script>
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -93,7 +93,7 @@
         <div class="flex justify-between items-center mb-3"><h2 class="text-xl font-black">Products & Variants</h2><button onclick="openProductModal()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-xs font-bold">+ Add Product with Variants</button></div>
         <input id="prodSearch" oninput="renderProducts()" placeholder="Search products..." class="w-full p-3 rounded-xl border bg-white mb-3">
         <div id="productList" class="space-y-3"></div>
-              </div><div id="page-stock" class="page hidden">
+      </div><div id="page-stock" class="page hidden">
         <h2 class="text-xl font-black mb-3">Stock Management - Per Variant</h2>
         <div class="bg-white p-4 rounded-2xl shadow-sm mb-3 grid md:grid-cols-4 gap-2">
           <select id="stockProd" class="border p-2 rounded-lg text-xs"></select>
@@ -282,4 +282,4 @@ async function resetAllSystemData() {
 <script src="js/accounting.js"></script>
 <script src="js/backup.js"></script>
 </body>
-              </html>
+  </html>
